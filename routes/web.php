@@ -5,6 +5,9 @@ use Illuminate\Http\Request;
 use App\Http\Middleware\MyMiddlewareCheckExecutionOrder;
 use App\Http\Middleware\MyMiddlewareWhitelistIP;
 use App\Http\Middleware\MyMiddlewareRedirectIfAccessRequest;
+use App\Http\Controllers\ToolController;
+use App\Models\Tool;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,3 +52,17 @@ Route::get('/test-middleware', function () {
 Route::get('/secure', function () {
     return 'Vous avez accès à cette page !';
 })->middleware(MyMiddlewareRedirectIfAccessRequest::class);
+
+
+
+
+//Route::get('/tools', [ToolController::class, 'index']);
+
+Route::get('/toolsdb', function () {
+    $tools = Tool::all(); // Récupère tous les outils dans la base de données
+    return view('tools.index', compact('tools'));
+});
+
+//Route::get('/tools/{id}', [ToolController::class, 'show']);
+
+Route::resource('tools', ToolController::class)->only(['index', 'show']);
