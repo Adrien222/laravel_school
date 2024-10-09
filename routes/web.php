@@ -6,7 +6,9 @@ use App\Http\Middleware\MyMiddlewareCheckExecutionOrder;
 use App\Http\Middleware\MyMiddlewareWhitelistIP;
 use App\Http\Middleware\MyMiddlewareRedirectIfAccessRequest;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\InvoiceController;
 use App\Models\Tool;
+use App\Models\Invoice;
 
 
 Route::get('/', function () {
@@ -66,3 +68,22 @@ Route::get('/toolsdb', function () {
 //Route::get('/tools/{id}', [ToolController::class, 'show']);
 
 Route::resource('tools', ToolController::class)->only(['index', 'show']);
+
+Route::get('/invoices', function (Request $request) {
+    // Récupérer la valeur de la query
+    $request->validate([
+        'order' => 'required|string|in:asc,desc'
+    ]); // Ajout du point-virgule ici
+
+    $order = $request->query('order', 'asc'); // Ajouter 'asc' comme valeur par défaut
+
+    // Récupérer les factures triées par montant
+    $invoices = Invoice::query()
+        ->orderBy('total_amount', $order)
+        ->paginate(10); 
+
+    return view('invoices.index', compact('invoices'));
+});
+
+
+Route::get('/invoicesC', [InvoiceController::class, 'index'])->name('invoices.index');
