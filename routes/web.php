@@ -87,3 +87,11 @@ Route::get('/invoices', function (Request $request) {
 
 
 Route::get('/invoicesC', [InvoiceController::class, 'index'])->name('invoices.index');
+
+
+//Exercice 3 09/10/2024
+/*Route::get('/search', function () {
+    return view('invoices.search');
+})->name('search');*/
+
+Route::get('/search', [InvoiceController::class, 'search'])->name('search');

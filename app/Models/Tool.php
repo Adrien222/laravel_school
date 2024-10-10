@@ -12,4 +12,10 @@ class Tool extends Model
     protected $table = 'tools';
 
     protected $fillable = ['name', 'description', 'price'];
+
+    // Relation ManyToMany : un outil peut apparaître dans plusieurs factures
+    public function invoices()
+    {
+        return $this->belongsToMany(Invoice::class, 'invoice_tool');
+    }
 }

@@ -19,4 +19,20 @@ class Invoice extends Model
         'send_at',
         'acquitted_at',
     ];
+
+    protected $casts = [
+        'send_at' => 'datetime',
+        'acquitted_at' => 'datetime',
+    ];
+
+    // Relation ManyToOne : une facture appartient à un client
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+    // Relation ManyToMany : une facture peut contenir plusieurs outils
+    public function tools()
+    {
+        return $this->belongsToMany(Tool::class, 'invoice_tool');
+    }
 }
