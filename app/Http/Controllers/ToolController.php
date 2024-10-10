@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Tool;
 
 class ToolController extends Controller
 {
@@ -39,4 +40,14 @@ class ToolController extends Controller
 
         return view('tools.show', compact('tool'));
     }
+
+    public function testCast()
+    {
+        // Trouver un outil existant
+        $tool = Tool::find(1);
+
+        // Afficher le prix actuel
+        dd("Prix actuel : " . $tool->price);
+    }
+
 }

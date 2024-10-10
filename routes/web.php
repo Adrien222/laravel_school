@@ -95,3 +95,27 @@ Route::get('/invoicesC', [InvoiceController::class, 'index'])->name('invoices.in
 })->name('search');*/
 
 Route::get('/search', [InvoiceController::class, 'search'])->name('search');
+
+//TP5 10/10
+
+Route::get('/toolsedit', function () {
+    $tools = \App\Models\Tool::all();
+
+    foreach ($tools as $tool) {
+        $tool->update(['price' => json_encode([
+            'amount' => $tool->price,
+            'currency' => 'EUR',
+            'currency_rate' => rand(0, 100) / 100,
+        ])]);
+    }
+});
+
+Route::get('/test-cast-controller', [ToolController::class, 'testCast']);
+
+Route::get('/tools-price', function () {
+    // Utiliser le scope pour obtenir les outils dont le prix est supérieur à 50
+    $tools = Tool::wherePriceGreaterThan(50)->get();
+
+    dd($tools); 
+});
+
