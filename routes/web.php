@@ -119,3 +119,11 @@ Route::get('/tools-price', function () {
     dd($tools); 
 });
 
+Route::get('/test-rate-service', function (App\Services\RateService $rateService) {
+    // Test de l'API pour récupérer le taux pour une devise donnée
+    $rate = $rateService->getRateFromCurrency('USD');
+    
+    dd($rate);
+});
+
+

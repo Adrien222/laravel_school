@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Services\RateService;
 use http\Exception\InvalidArgumentException;
 use Illuminate\Contracts\Support\Arrayable;
 use Stringable;
@@ -28,9 +29,13 @@ class Price implements Arrayable, Stringable
         return str($currency)->length() === 3;
     }
 
-    private static function getCurrencyRate($currency)
+    private function getCurrencyRate($currency)
     {
-        return crc32($currency) / 10_000_000_000;
+        // On récupère l'instance du service RateService via le service container
+        $rateService = app(RateService::class);
+        
+        // On retourne le taux de change obtenu depuis le service
+        return $rateService->getRateFromCurrency($currency);
     }
 
     public static function fromEuros(float $price)

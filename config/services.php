@@ -35,4 +35,7 @@ return [
         ],
     ],
 
+    'rate' => [
+        'url' => env('API_RATE_URL'),
+    ],
 ];
