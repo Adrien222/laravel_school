@@ -5,8 +5,11 @@ use Illuminate\Http\Request;
 use App\Http\Middleware\MyMiddlewareCheckExecutionOrder;
 use App\Http\Middleware\MyMiddlewareWhitelistIP;
 use App\Http\Middleware\MyMiddlewareRedirectIfAccessRequest;
+use App\Http\Middleware\Guest;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuthenticationController;
 use App\Models\Tool;
 use App\Models\Invoice;
 
@@ -125,5 +128,27 @@ Route::get('/test-rate-service', function (App\Services\RateService $rateService
     
     dd($rate);
 });
+
+// Route pour afficher le formulaire de connexion
+Route::get('/auth/login', [AuthenticationController::class, 'showForm'])
+    ->name('login')
+    ->middleware('guest');
+
+// Route pour gérer la soumission du formulaire de connexion
+Route::post('/auth/login', [AuthenticationController::class, 'login'])
+    ->middleware('guest');
+
+// Route pour le callback après avoir cliqué sur le lien d'authentification
+Route::get('/auth/callback', [AuthenticationController::class, 'callback'])
+    ->name('authentication.callback')
+    ->middleware('guest');
+
+// Route pour déconnexion de l'utilisateur
+Route::get('/auth/logout', [AuthenticationController::class, 'logout'])
+    ->name('logout')
+    ->middleware('auth');
+
+Route::get('/home', HomeController::class
+)->middleware('auth');
 
 
