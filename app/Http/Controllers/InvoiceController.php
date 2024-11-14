@@ -66,7 +66,7 @@ class InvoiceController extends BaseController
         }
 
         $amount_before_tax = array_reduce($items, function ($carry, $item) {
-            return $carry + $item->price->toArray()['price'];
+            return $carry + $item->price->toArray()['amount'];
         }, 0);
 
         $tax = $amount_before_tax * 0.2;
