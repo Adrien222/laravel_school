@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Services\AuthenticationService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Message;
-
+use App\Enums\Roles;
 
 class User extends Authenticatable
 {
@@ -22,8 +22,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'authentication_token', 
-        'authentication_token_generated_at', 
+        'authentication_token',
+        'authentication_token_generated_at',
+        'role',
     ];
 
     /**
@@ -32,7 +33,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'authentication_token', // On masque le token
+        'authentication_token',
         'remember_token',
     ];
 
@@ -45,16 +46,17 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'authentication_token_generated_at' => 'datetime', 
+            'authentication_token_generated_at' => 'datetime',
+            'role' => Roles::class,
         ];
     }
 
     public function sendAuthenticationMail(?string $redirect_to = null): void
     {
-        $authenticationSerive = new AuthenticationService($this);
+        $authenticationService = new AuthenticationService($this);
 
         $url = route('authentication.callback', [
-            'token' => $authenticationSerive->createToken(),
+            'token' => $authenticationService->createToken(),
             'email' => $this->email,
             'redirect_to' => $redirect_to ?? url("/home"),
         ]);

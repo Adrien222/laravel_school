@@ -2,153 +2,103 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use App\Http\Middleware\MyMiddlewareCheckExecutionOrder;
-use App\Http\Middleware\MyMiddlewareWhitelistIP;
-use App\Http\Middleware\MyMiddlewareRedirectIfAccessRequest;
-use App\Http\Middleware\Guest;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Middleware\Guest;
+use App\Http\Middleware\MyMiddlewareCheckExecutionOrder;
+use App\Http\Middleware\MyMiddlewareRedirectIfAccessRequest;
+use App\Http\Middleware\MyMiddlewareWhitelistIP;
 use App\Models\Tool;
-use App\Models\Invoice;
 
-
+// Page d'accueil
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/request', function ($request) {
+// Route de test de requête
+Route::get('/request', function (Request $request) {
     return dd($request);
 });
 
-// Route qui fait une redirection permanente vers /
+// Route pour redirection permanente vers /
 Route::get('/redirect', function () {
     return redirect('/')->setStatusCode(301);
 });
 
-
-// Route qui affiche le nom dynamique
+// Route dynamique pour afficher un nom
 Route::get('/name/{name}', function ($name) {
     return "Bonjour, " . ucfirst($name);
 });
 
-// Route qui affiche l'ID (seulement si c'est un numéro)
+// Route dynamique pour afficher un ID (numérique uniquement)
 Route::get('/ressource/{id}', function ($id) {
     return "L'ID est : " . $id;
 })->where('id', '[0-9]+');
 
-//La route test
+// Route de test simple
 Route::get('/test', function () {
     return view('test');
 });
 
-
-// La route POST pour le formulaire test
+// Route POST pour un formulaire de test
 Route::post('/request', function (Request $request) {
     dd($request->all());
 })->name('request');
 
+// Route de test de middleware pour vérifier l'ordre d'exécution
 Route::get('/test-middleware', function () {
     return view('test');
-    dd('Route exécutée après le middleware');
 })->middleware(MyMiddlewareCheckExecutionOrder::class);
 
+// Route sécurisée par middleware de redirection
 Route::get('/secure', function () {
     return 'Vous avez accès à cette page !';
 })->middleware(MyMiddlewareRedirectIfAccessRequest::class);
 
-
-
-
-//Route::get('/tools', [ToolController::class, 'index']);
-
-Route::get('/toolsdb', function () {
-    $tools = Tool::all(); // Récupère tous les outils dans la base de données
-    return view('tools.index', compact('tools'));
-});
-
-//Route::get('/tools/{id}', [ToolController::class, 'show']);
-
+// Routes pour les outils avec ressource limitées
 Route::resource('tools', ToolController::class)->only(['index', 'show']);
 
-Route::get('/invoices', function (Request $request) {
-    // Récupérer la valeur de la query
-    $request->validate([
-        'order' => 'required|string|in:asc,desc'
-    ]); // Ajout du point-virgule ici
-
-    $order = $request->query('order', 'asc'); // Ajouter 'asc' comme valeur par défaut
-
-    // Récupérer les factures triées par montant
-    $invoices = Invoice::query()
-        ->orderBy('total_amount', $order)
-        ->paginate(10); 
-
-    return view('invoices.index', compact('invoices'));
-});
-
-
-Route::get('/invoicesC', [InvoiceController::class, 'index'])->name('invoices.index');
-
-
-//Exercice 3 09/10/2024
-/*Route::get('/search', function () {
-    return view('invoices.search');
-})->name('search');*/
-
-Route::get('/search', [InvoiceController::class, 'search'])->name('search');
-
-//TP5 10/10
-
+// Route pour tester l'édition des outils
 Route::get('/toolsedit', function () {
     $tools = \App\Models\Tool::all();
-
     foreach ($tools as $tool) {
-        $tool->update(['price' => json_encode([
-            'amount' => $tool->price,
-            'currency' => 'EUR',
-            'currency_rate' => rand(0, 100) / 100,
-        ])]);
+        $tool->update([
+            'price' => json_encode([
+                'amount' => $tool->price,
+                'currency' => 'EUR',
+                'currency_rate' => rand(0, 100) / 100,
+            ])
+        ]);
     }
 });
 
+// Route pour tester le cast personnalisé dans ToolController
 Route::get('/test-cast-controller', [ToolController::class, 'testCast']);
 
+// Route pour tester le filtrage des outils par prix
 Route::get('/tools-price', function () {
-    // Utiliser le scope pour obtenir les outils dont le prix est supérieur à 50
     $tools = Tool::wherePriceGreaterThan(50)->get();
-
-    dd($tools); 
+    dd($tools);
 });
 
-Route::get('/test-rate-service', function (App\Services\RateService $rateService) {
-    // Test de l'API pour récupérer le taux pour une devise donnée
-    $rate = $rateService->getRateFromCurrency('USD');
-    
-    dd($rate);
-});
-
-// Route pour afficher le formulaire de connexion
+// Routes d'authentification Magic Link
 Route::get('/auth/login', [AuthenticationController::class, 'showForm'])
     ->name('login')
     ->middleware('guest');
-
-// Route pour gérer la soumission du formulaire de connexion
 Route::post('/auth/login', [AuthenticationController::class, 'login'])
     ->middleware('guest');
-
-// Route pour le callback après avoir cliqué sur le lien d'authentification
 Route::get('/auth/callback', [AuthenticationController::class, 'callback'])
     ->name('authentication.callback')
     ->middleware('guest');
-
-// Route pour déconnexion de l'utilisateur
 Route::get('/auth/logout', [AuthenticationController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
-Route::get('/home', HomeController::class
-)->middleware('auth');
+// Page d'accueil pour les utilisateurs authentifiés
+Route::get('/home', HomeController::class)
+    ->middleware('auth');
 
-
+// Routes pour InvoiceController avec protection d'accès
+Route::resource('invoices', InvoiceController::class);
