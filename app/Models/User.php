@@ -47,10 +47,24 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'authentication_token_generated_at' => 'datetime',
-            'role' => Roles::class,
+            'role' => 'string',
         ];
     }
 
+    /**
+     * Relation with invoices
+     * Each user can have multiple invoices.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'client_id');
+    }
+
+    /**
+     * Send an authentication email with a magic link to the user.
+     *
+     * @param string|null $redirect_to
+     */
     public function sendAuthenticationMail(?string $redirect_to = null): void
     {
         $authenticationService = new AuthenticationService($this);
