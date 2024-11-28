@@ -9,7 +9,10 @@ use App\Services\AuthenticationService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Message;
 use App\Enums\Roles;
+use App\Observers\UserObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy(UserObserver::class)]
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
